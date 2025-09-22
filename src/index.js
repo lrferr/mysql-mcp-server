@@ -33,7 +33,7 @@ class MySQLMCPServer {
     this.server = new Server(
       {
         name: getEnvVar('MCP_SERVER_NAME', 'mysql-mcp-server-v1'),
-        version: getEnvVar('MCP_SERVER_VERSION', '1.1.2')
+        version: getEnvVar('MCP_SERVER_VERSION', '1.1.4')
       },
       {
         capabilities: {
@@ -52,6 +52,11 @@ class MySQLMCPServer {
     this.dmlOperations = new DMLOperations(this.connectionManager);
     this.dclOperations = new DCLOperations(this.connectionManager);
     this.securityAudit = new SecurityAudit(this.connectionManager);
+    
+    // Inicializar o connectionManager imediatamente
+    this.connectionManager.initialize().catch(error => {
+      this.logger.error('Erro ao inicializar ConnectionManager:', error);
+    });
 
     this.setupHandlers();
   }
@@ -291,6 +296,8 @@ class MySQLMCPServer {
       try {
         // Ferramentas de conexão
         if (name === 'list_connections') {
+          // Garantir que o connectionManager esteja inicializado
+          await this.connectionManager.initialize();
           const connections = this.connectionManager.getAvailableConnections();
           return {
             content: [
@@ -302,6 +309,7 @@ class MySQLMCPServer {
           };
         }
         if (name === 'test_connection') {
+          await this.connectionManager.initialize();
           const result = await this.connectionManager.testConnection(args.connectionName);
           return {
             content: [
@@ -315,6 +323,7 @@ class MySQLMCPServer {
           };
         }
         if (name === 'test_all_connections') {
+          await this.connectionManager.initialize();
           const results = await this.connectionManager.testAllConnections();
           return {
             content: [
@@ -326,6 +335,7 @@ class MySQLMCPServer {
           };
         }
         if (name === 'get_connections_status') {
+          await this.connectionManager.initialize();
           const status = await this.connectionManager.getConnectionsStatus();
           return {
             content: [
