@@ -198,3 +198,5 @@ Agradecemos a todos os pesquisadores de segurança que reportaram vulnerabilidad
 
 **Última atualização**: 19 de dezembro de 2024
 
+
+

@@ -921,3 +921,5 @@ Gera relatório de auditoria das operações.
 
 **Documentação da API completa! 📚**
 
+
+

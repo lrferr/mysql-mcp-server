@@ -150,3 +150,5 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - [Unreleased]: https://github.com/lrferr/mysql-mcp-server/compare/v1.0.0...HEAD
 - [1.0.0]: https://github.com/lrferr/mysql-mcp-server/releases/tag/v1.0.0
 
+
+
