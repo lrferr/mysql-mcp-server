@@ -550,11 +550,19 @@ class MySQLMCPServer {
   }
 }
 
-// Iniciar o servidor
-const server = new MySQLMCPServer();
-server.start().catch((error) => {
-  const logger = new Logger();
-  logger.error('Erro ao iniciar servidor MCP:', error);
-  process.exit(1);
-});
+// Exportar como default para uso em wrapper
+export default async function startServer() {
+  const server = new MySQLMCPServer();
+  await server.start();
+  return server;
+}
+
+// Se executado diretamente, iniciar o servidor
+if (import.meta.url === `file://${process.argv[1]}`) {
+  startServer().catch((error) => {
+    const logger = new Logger();
+    logger.error('Erro ao iniciar servidor MCP:', error);
+    process.exit(1);
+  });
+}
 
