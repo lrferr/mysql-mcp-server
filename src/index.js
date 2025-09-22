@@ -33,7 +33,7 @@ class MySQLMCPServer {
     this.server = new Server(
       {
         name: getEnvVar('MCP_SERVER_NAME', 'mysql-mcp-server-v1'),
-        version: getEnvVar('MCP_SERVER_VERSION', '1.1.4')
+        version: getEnvVar('MCP_SERVER_VERSION', '1.1.5')
       },
       {
         capabilities: {
@@ -349,33 +349,105 @@ class MySQLMCPServer {
 
         // Ferramentas de monitoramento
         if (name === 'check_database_health') {
-          return await this.monitor.checkDatabaseHealth(args);
+          const result = await this.monitor.checkDatabaseHealth(args);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: result
+              }
+            ]
+          };
         }
         if (name === 'monitor_schema_changes') {
-          return await this.monitor.monitorSchemaChanges(args);
+          const result = await this.monitor.monitorSchemaChanges(args);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: result
+              }
+            ]
+          };
         }
         if (name === 'check_sensitive_tables') {
-          return await this.monitor.checkSensitiveTables(args);
+          const result = await this.monitor.checkSensitiveTables(args);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: result
+              }
+            ]
+          };
         }
         if (name === 'detect_suspicious_activity') {
-          return await this.monitor.detectSuspiciousActivity(args);
+          const result = await this.monitor.detectSuspiciousActivity(args);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: result
+              }
+            ]
+          };
         }
 
         // Ferramentas de análise
         if (name === 'get_table_info') {
-          return await this.monitor.getTableInfo(args);
+          const result = await this.monitor.getTableInfo(args);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: result
+              }
+            ]
+          };
         }
         if (name === 'get_constraints') {
-          return await this.monitor.getConstraints(args);
+          const result = await this.monitor.getConstraints(args);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: result
+              }
+            ]
+          };
         }
         if (name === 'get_foreign_keys') {
-          return await this.monitor.getForeignKeys(args);
+          const result = await this.monitor.getForeignKeys(args);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: result
+              }
+            ]
+          };
         }
         if (name === 'get_indexes') {
-          return await this.monitor.getIndexes(args);
+          const result = await this.monitor.getIndexes(args);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: result
+              }
+            ]
+          };
         }
         if (name === 'analyze_table') {
-          return await this.monitor.analyzeTable(args);
+          const result = await this.monitor.analyzeTable(args);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: result
+              }
+            ]
+          };
         }
 
         return {
