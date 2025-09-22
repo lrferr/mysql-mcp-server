@@ -28,7 +28,7 @@ class ConfigManager {
    * Carrega configurações de todas as fontes em ordem de prioridade
    */
   async loadConfigurations() {
-    console.log('🔧 Carregando configurações hierárquicas...\n');
+    // console.log('🔧 Carregando configurações hierárquicas...\n');
 
     // 1. Tentar carregar do mcp.json (mais seguro)
     await this.tryLoadFromMcpJson();
@@ -66,13 +66,13 @@ class ConfigManager {
               config: connections,
               priority: 1
             });
-            console.log(`✅ Configuração encontrada em mcp.json (${serverName})`);
+            // console.log(`✅ Configuração encontrada em mcp.json (${serverName})`);
             return;
           }
         }
       }
     } catch (error) {
-      console.log(`⚠️  Erro ao carregar mcp.json: ${error.message}`);
+      // console.log(`⚠️  Erro ao carregar mcp.json: ${error.message}`);
     }
   }
 
@@ -90,10 +90,10 @@ class ConfigManager {
           config: config,
           priority: 2
         });
-        console.log('✅ Configuração encontrada em mysql-connections.json');
+        // console.log('✅ Configuração encontrada em mysql-connections.json');
       }
     } catch (error) {
-      console.log(`⚠️  Erro ao carregar mysql-connections.json: ${error.message}`);
+      // console.log(`⚠️  Erro ao carregar mysql-connections.json: ${error.message}`);
     }
   }
 
@@ -115,11 +115,11 @@ class ConfigManager {
             config: connections,
             priority: 3
           });
-          console.log('✅ Configuração encontrada em .env');
+          // console.log('✅ Configuração encontrada em .env');
         }
       }
     } catch (error) {
-      console.log(`⚠️  Erro ao carregar .env: ${error.message}`);
+      // console.log(`⚠️  Erro ao carregar .env: ${error.message}`);
     }
   }
 
@@ -145,7 +145,7 @@ class ConfigManager {
       config: defaultConfig,
       priority: 4
     });
-    console.log('✅ Usando configurações padrão (localhost)');
+    // console.log('✅ Usando configurações padrão (localhost)');
   }
 
   /**
@@ -169,24 +169,24 @@ class ConfigManager {
    * Exibe resumo das configurações carregadas
    */
   displayConfigurationSummary() {
-    console.log('\n📋 Resumo das Configurações:');
-    console.log('=' .repeat(50));
+    // console.log('\n📋 Resumo das Configurações:');
+    // console.log('=' .repeat(50));
     
     this.configSources.forEach((source, index) => {
       const status = index === 0 ? '✅ ATIVA' : '⏸️  Disponível';
-      console.log(`${status} ${source.source} (Prioridade ${source.priority})`);
+      // console.log(`${status} ${source.source} (Prioridade ${source.priority})`);
       
       if (source.config?.connections) {
         const connectionNames = Object.keys(source.config.connections);
-        console.log(`   Conexões: ${connectionNames.join(', ')}`);
-        console.log(`   Padrão: ${source.config.defaultConnection}`);
+        // console.log(`   Conexões: ${connectionNames.join(', ')}`);
+        // console.log(`   Padrão: ${source.config.defaultConnection}`);
       }
-      console.log();
+      // console.log();
     });
 
     if (this.finalConfig) {
-      console.log(`🎯 Configuração selecionada: ${this.loadedFrom}`);
-      console.log(`📊 Total de conexões: ${Object.keys(this.finalConfig.connections).length}`);
+      // console.log(`🎯 Configuração selecionada: ${this.loadedFrom}`);
+      // console.log(`📊 Total de conexões: ${Object.keys(this.finalConfig.connections).length}`);
     }
   }
 

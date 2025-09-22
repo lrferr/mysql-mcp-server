@@ -37,6 +37,11 @@ export class ConnectionManager {
 
   async getConnection(connectionName = null) {
     await this.initialize();
+    
+    if (!this.config || !this.config.connections) {
+      throw new Error('Configuração de conexões não carregada');
+    }
+    
     const connName = connectionName || this.config.defaultConnection;
     
     if (!this.config.connections[connName]) {
@@ -84,6 +89,10 @@ export class ConnectionManager {
   }
 
   async getConnectionConfig(connectionName = null) {
+    if (!this.config || !this.config.connections) {
+      throw new Error('Configuração de conexões não carregada');
+    }
+    
     const connName = connectionName || this.config.defaultConnection;
     
     if (!this.config.connections[connName]) {
@@ -123,6 +132,9 @@ export class ConnectionManager {
   }
 
   getAvailableConnections() {
+    if (!this.config || !this.config.connections) {
+      return [];
+    }
     return Object.keys(this.config.connections).map(name => ({
       name,
       description: this.config.connections[name].description,
@@ -130,8 +142,13 @@ export class ConnectionManager {
     }));
   }
 
+  // Método listConnections para compatibilidade com o servidor MCP
+  listConnections() {
+    return this.getAvailableConnections();
+  }
+
   getDefaultConnection() {
-    return this.config.defaultConnection;
+    return this.config ? this.config.defaultConnection : null;
   }
 
   async testConnection(connectionName) {
@@ -139,10 +156,12 @@ export class ConnectionManager {
       const connection = await this.getConnection(connectionName);
       await connection.execute('SELECT 1');
       
+      const connectionConfig = this.config && this.config.connections ? this.config.connections[connectionName] : null;
+      
       return {
         success: true,
         message: `Conexão '${connectionName}' testada com sucesso`,
-        connection: this.config.connections[connectionName]
+        connection: connectionConfig
       };
     } catch (error) {
       return {
@@ -154,6 +173,10 @@ export class ConnectionManager {
   }
 
   async testAllConnections() {
+    if (!this.config || !this.config.connections) {
+      return {};
+    }
+    
     const results = {};
     
     for (const connName of Object.keys(this.config.connections)) {

@@ -7,6 +7,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+## [1.1.2] - 2025-01-22
+
+### Corrigido
+- Corrigido problema de logs sendo enviados para stdout interferindo com JSON-RPC
+- Corrigido método `listConnections()` no ConnectionManager
+- Corrigido tratamento de configuração nula em todos os métodos do ConnectionManager
+- Removido listeners duplicados que causavam warnings de memory leak
+- Corrigido todos os console.log que interferiam com comunicação MCP
+
+### Melhorado
+- Comunicação JSON-RPC agora funciona corretamente sem interferência de logs
+- Servidor MCP mais estável e confiável
+- Melhor tratamento de erros quando configuração não está carregada
+
 ## [1.1.1] - 2025-01-22
 
 ### Corrigido

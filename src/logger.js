@@ -66,17 +66,7 @@ export class Logger {
     }
 
     // Capturar exceções e rejeições não tratadas (apenas uma vez)
-    if (!process.listeners('uncaughtException').length) {
-      process.on('uncaughtException', (error) => {
-        this.logger.error('Uncaught Exception:', error);
-      });
-    }
-
-    if (!process.listeners('unhandledRejection').length) {
-      process.on('unhandledRejection', (reason, promise) => {
-        this.logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-      });
-    }
+    // Removido para evitar listeners duplicados em múltiplas instâncias
   }
 
   debug(message, meta = {}) {

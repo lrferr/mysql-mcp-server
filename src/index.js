@@ -30,7 +30,7 @@ class MySQLMCPServer {
     this.server = new Server(
       {
         name: getEnvVar('MCP_SERVER_NAME', 'mysql-mcp-server-v1'),
-        version: getEnvVar('MCP_SERVER_VERSION', '1.0.4')
+        version: getEnvVar('MCP_SERVER_VERSION', '1.1.2')
       },
       {
         capabilities: {
@@ -391,7 +391,8 @@ class MySQLMCPServer {
   async start() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    this.logger.info('Servidor MCP MySQL iniciado com sucesso!');
+    // Não logar para stdout quando usando stdio transport
+    // this.logger.info('Servidor MCP MySQL iniciado com sucesso!');
   }
 }
 
@@ -402,7 +403,7 @@ async function startServer() {
     await server.start();
     return server;
   } catch (error) {
-    console.error('Erro ao iniciar servidor MCP:', error);
+    // console.error('Erro ao iniciar servidor MCP:', error);
     process.exit(1);
   }
 }
