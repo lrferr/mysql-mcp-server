@@ -288,16 +288,50 @@ class MySQLMCPServer {
       try {
         // Ferramentas de conexão
         if (name === 'list_connections') {
-          return await this.connectionManager.listConnections();
+          const connections = this.connectionManager.getAvailableConnections();
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Conexões disponíveis: ${JSON.stringify(connections, null, 2)}`
+              }
+            ]
+          };
         }
         if (name === 'test_connection') {
-          return await this.connectionManager.testConnection(args.connectionName);
+          const result = await this.connectionManager.testConnection(args.connectionName);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: result.success ? 
+                  `✅ ${result.message}` : 
+                  `❌ ${result.message}`
+              }
+            ]
+          };
         }
         if (name === 'test_all_connections') {
-          return await this.connectionManager.testAllConnections();
+          const results = await this.connectionManager.testAllConnections();
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Resultados dos testes de conexão:\n${JSON.stringify(results, null, 2)}`
+              }
+            ]
+          };
         }
         if (name === 'get_connections_status') {
-          return await this.connectionManager.getConnectionsStatus();
+          const status = await this.connectionManager.getConnectionsStatus();
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Status das conexões:\n${JSON.stringify(status, null, 2)}`
+              }
+            ]
+          };
         }
 
         // Ferramentas de monitoramento

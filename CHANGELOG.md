@@ -7,6 +7,21 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+## [1.1.1] - 2025-01-22
+
+### Corrigido
+- Corrigido método `listConnections()` que estava chamando método inexistente
+- Corrigido retorno das ferramentas MCP para formato correto com `content`
+- Melhorado tratamento de erros nas ferramentas de conexão
+- Corrigido método `getAvailableConnections()` para listar conexões corretamente
+
+### Melhorado
+- Formatação de retorno das ferramentas de teste de conexão
+- Mensagens de erro mais claras e informativas
+- Estrutura de resposta padronizada para todas as ferramentas MCP
+
+## [1.1.0] - 2025-01-22
+
 ### Adicionado
 - Sistema de múltiplas conexões simultâneas
 - Ferramentas de monitoramento de banco de dados
