@@ -1,0 +1,127 @@
+{
+  "name": "mysql-mcp-server",
+  "version": "1.0.0",
+  "description": "Servidor MCP completo para MySQL Database com operações DDL, DML, DCL, monitoramento e auditoria",
+  "main": "src/index.js",
+  "bin": {
+    "mysql-mcp": "bin/mysql-mcp-cli.js"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:unit": "echo \"Unit tests not configured yet\"",
+    "test:security": "echo \"Security tests not configured yet\"",
+    "test:integration": "echo \"Integration tests not configured yet\"",
+    "test:performance": "echo \"Performance tests not configured yet\"",
+    "test:all": "echo \"All tests not configured yet\"",
+    "lint": "eslint src/",
+    "format": "prettier --write src/",
+    "test-connection": "node scripts/test-connection.js",
+    "test-config": "node scripts/test-config-example.js",
+    "setup": "node scripts/setup.js",
+    "prepublishOnly": "npm test && npm run lint"
+  },
+  "keywords": [
+    "mcp",
+    "mysql",
+    "database",
+    "monitoring",
+    "migration",
+    "claude",
+    "cursor",
+    "ai",
+    "database-admin",
+    "sql",
+    "mysql-db",
+    "ddl",
+    "dml",
+    "dcl",
+    "audit",
+    "security",
+    "data-management"
+  ],
+  "author": {
+    "name": "Leandro Ferreira",
+    "email": "lrferr@gmail.com",
+    "url": "https://github.com/lrferr"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lrferr/mysql-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lrferr/mysql-mcp-server/issues"
+  },
+  "homepage": "https://github.com/lrferr/mysql-mcp-server#readme",
+  "readme": "README.md",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.5",
+    "chalk": "^5.3.0",
+    "dotenv": "^16.4.5",
+    "joi": "^17.13.3",
+    "mysql2": "^3.11.5",
+    "node-cron": "^3.0.3",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "nodemon": "^3.1.7",
+    "prettier": "^3.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "src/",
+    "bin/",
+    "scripts/",
+    "docs/",
+    "examples/",
+    "tests/",
+    "README.md",
+    "LICENSE",
+    "env.example"
+  ],
+  "os": [
+    "win32",
+    "darwin",
+    "linux"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "eslintConfig": {
+    "env": {
+      "node": true,
+      "es2022": true
+    },
+    "extends": [
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2022,
+      "sourceType": "module"
+    },
+    "rules": {
+      "no-unused-vars": "warn",
+      "no-console": "off",
+      "no-undef": "error",
+      "semi": [
+        "error",
+        "always"
+      ],
+      "quotes": [
+        "error",
+        "single"
+      ],
+      "indent": [
+        "error",
+        2
+      ]
+    }
+  }
+}

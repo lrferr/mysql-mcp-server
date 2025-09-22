@@ -1,0 +1,16 @@
+{
+    "mcpServers": {
+      "mysql-monitor": {
+        "command": "npm",
+        "args": [
+          "start"
+        ],
+        "env": {
+          "MCP_SERVER_NAME": "mysql-monitor",
+          "MCP_SERVER_VERSION": "1.0.0",
+          "LOG_LEVEL": "info",
+          "MYSQL_CONNECTIONS": "{\"connections\":{\"prod\":{\"host\":\"your_host\",\"port\":3306,\"user\":\"your_user\",\"password\":\"your_password\",\"database\":\"mysql\"}},\"defaultConnection\":\"prod\"}"
+        }
+      }
+    }
+  }
