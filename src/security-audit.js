@@ -200,7 +200,7 @@ export class SecurityAudit {
     
     for (const pattern of injectionPatterns) {
       if (pattern.test(whereClause)) {
-        throw new Error(`Possível tentativa de SQL injection detectada na cláusula WHERE`);
+        throw new Error('Possível tentativa de SQL injection detectada na cláusula WHERE');
       }
     }
   }

@@ -272,41 +272,41 @@ class MySQLMCPServer {
 
       try {
         switch (name) {
-          case 'check_database_health':
-            return await this.handleCheckDatabaseHealth(args);
+        case 'check_database_health':
+          return await this.handleCheckDatabaseHealth(args);
           
-          case 'monitor_schema_changes':
-            return await this.handleMonitorSchemaChanges(args);
+        case 'monitor_schema_changes':
+          return await this.handleMonitorSchemaChanges(args);
           
-          case 'validate_migration_script':
-            return await this.handleValidateMigrationScript(args);
+        case 'validate_migration_script':
+          return await this.handleValidateMigrationScript(args);
           
-          case 'check_sensitive_tables':
-            return await this.handleCheckSensitiveTables(args);
+        case 'check_sensitive_tables':
+          return await this.handleCheckSensitiveTables(args);
           
-          case 'execute_safe_query':
-            return await this.handleExecuteSafeQuery(args);
+        case 'execute_safe_query':
+          return await this.handleExecuteSafeQuery(args);
           
-          case 'get_database_info':
-            return await this.handleGetDatabaseInfo(args);
+        case 'get_database_info':
+          return await this.handleGetDatabaseInfo(args);
           
-          case 'get_table_info':
-            return await this.handleGetTableInfo(args);
+        case 'get_table_info':
+          return await this.handleGetTableInfo(args);
           
-          case 'list_connections':
-            return await this.handleListConnections();
+        case 'list_connections':
+          return await this.handleListConnections();
           
-          case 'test_connection':
-            return await this.handleTestConnection(args);
+        case 'test_connection':
+          return await this.handleTestConnection(args);
           
-          case 'test_all_connections':
-            return await this.handleTestAllConnections();
+        case 'test_all_connections':
+          return await this.handleTestAllConnections();
           
-          case 'get_connections_status':
-            return await this.handleGetConnectionsStatus();
+        case 'get_connections_status':
+          return await this.handleGetConnectionsStatus();
           
-          default:
-            throw new Error(`Ferramenta desconhecida: ${name}`);
+        default:
+          throw new Error(`Ferramenta desconhecida: ${name}`);
         }
       } catch (error) {
         this.logger.error(`Erro ao executar ferramenta ${name}:`, error);
@@ -441,12 +441,12 @@ class MySQLMCPServer {
       const { connectionName = null } = args;
       const result = await this.mysqlMonitor.testConnection(connectionName);
       
-      let message = `## Teste de Conexão\n\n`;
+      let message = '## Teste de Conexão\n\n';
       
       if (result.success) {
         message += `✅ **${result.message}**\n\n`;
         if (result.connection) {
-          message += `**Detalhes da Conexão:**\n`;
+          message += '**Detalhes da Conexão:**\n';
           message += `- Host: ${result.connection.host}:${result.connection.port}\n`;
           message += `- Usuário: ${result.connection.user}\n`;
           message += `- Database: ${result.connection.database}\n`;
@@ -514,7 +514,7 @@ class MySQLMCPServer {
         message += `### ${connName}\n`;
         
         if (connStatus.active) {
-          message += `✅ **Ativa**\n`;
+          message += '✅ **Ativa**\n';
           if (connStatus.info) {
             message += `- Database: ${connStatus.info.database || 'N/A'}\n`;
             message += `- Host: ${connStatus.info.host || 'N/A'}\n`;
@@ -522,7 +522,7 @@ class MySQLMCPServer {
             message += `- Hora Atual: ${new Date().toISOString()}\n`;
           }
         } else {
-          message += `❌ **Inativa**\n`;
+          message += '❌ **Inativa**\n';
           if (connStatus.error) {
             message += `**Erro:** ${connStatus.error}\n`;
           }

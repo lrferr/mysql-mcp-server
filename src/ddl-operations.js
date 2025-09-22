@@ -74,20 +74,20 @@ export class DDLOperations {
       const constraintDefinitions = constraints.map(constraint => {
         let def = '';
         switch (constraint.type) {
-          case 'PRIMARY KEY':
-            def += `PRIMARY KEY (${constraint.columns.map(col => `\`${col}\``).join(', ')})`;
-            break;
-          case 'UNIQUE':
-            def += `UNIQUE KEY \`${constraint.name}\` (${constraint.columns.map(col => `\`${col}\``).join(', ')})`;
-            break;
-          case 'FOREIGN KEY':
-            def += `CONSTRAINT \`${constraint.name}\` FOREIGN KEY (${constraint.columns.map(col => `\`${col}\``).join(', ')}) REFERENCES \`${constraint.referencedTable}\`(${constraint.referencedColumns.map(col => `\`${col}\``).join(', ')})`;
-            if (constraint.onDelete) def += ` ON DELETE ${constraint.onDelete}`;
-            if (constraint.onUpdate) def += ` ON UPDATE ${constraint.onUpdate}`;
-            break;
-          case 'INDEX':
-            def += `KEY \`${constraint.name}\` (${constraint.columns.map(col => `\`${col}\``).join(', ')})`;
-            break;
+        case 'PRIMARY KEY':
+          def += `PRIMARY KEY (${constraint.columns.map(col => `\`${col}\``).join(', ')})`;
+          break;
+        case 'UNIQUE':
+          def += `UNIQUE KEY \`${constraint.name}\` (${constraint.columns.map(col => `\`${col}\``).join(', ')})`;
+          break;
+        case 'FOREIGN KEY':
+          def += `CONSTRAINT \`${constraint.name}\` FOREIGN KEY (${constraint.columns.map(col => `\`${col}\``).join(', ')}) REFERENCES \`${constraint.referencedTable}\`(${constraint.referencedColumns.map(col => `\`${col}\``).join(', ')})`;
+          if (constraint.onDelete) def += ` ON DELETE ${constraint.onDelete}`;
+          if (constraint.onUpdate) def += ` ON UPDATE ${constraint.onUpdate}`;
+          break;
+        case 'INDEX':
+          def += `KEY \`${constraint.name}\` (${constraint.columns.map(col => `\`${col}\``).join(', ')})`;
+          break;
         }
         return def;
       }).filter(def => def).join(',\n  ');
@@ -148,89 +148,89 @@ export class DDLOperations {
       let alterQuery = `ALTER TABLE \`${database}\`.\`${tableName}\` `;
 
       switch (operation) {
-        case 'ADD_COLUMN': {
-          if (!columnName || !columnType) {
-            throw new Error('Nome e tipo da coluna são obrigatórios para ADD_COLUMN');
-          }
-          let columnDef = `ADD COLUMN \`${columnName}\` ${columnType}`;
-          if (columnLength) columnDef += `(${columnLength})`;
-          if (notNull) columnDef += ' NOT NULL';
-          if (autoIncrement) columnDef += ' AUTO_INCREMENT';
-          if (defaultValue !== undefined) columnDef += ` DEFAULT ${defaultValue}`;
-          if (comment) columnDef += ` COMMENT '${comment}'`;
-          alterQuery += columnDef;
+      case 'ADD_COLUMN': {
+        if (!columnName || !columnType) {
+          throw new Error('Nome e tipo da coluna são obrigatórios para ADD_COLUMN');
+        }
+        let columnDef = `ADD COLUMN \`${columnName}\` ${columnType}`;
+        if (columnLength) columnDef += `(${columnLength})`;
+        if (notNull) columnDef += ' NOT NULL';
+        if (autoIncrement) columnDef += ' AUTO_INCREMENT';
+        if (defaultValue !== undefined) columnDef += ` DEFAULT ${defaultValue}`;
+        if (comment) columnDef += ` COMMENT '${comment}'`;
+        alterQuery += columnDef;
+        break;
+      }
+
+      case 'MODIFY_COLUMN': {
+        if (!columnName || !columnType) {
+          throw new Error('Nome e tipo da coluna são obrigatórios para MODIFY_COLUMN');
+        }
+        let modifyDef = `MODIFY COLUMN \`${columnName}\` ${columnType}`;
+        if (columnLength) modifyDef += `(${columnLength})`;
+        if (notNull !== undefined) modifyDef += notNull ? ' NOT NULL' : ' NULL';
+        if (autoIncrement) modifyDef += ' AUTO_INCREMENT';
+        if (defaultValue !== undefined) modifyDef += ` DEFAULT ${defaultValue}`;
+        if (comment) modifyDef += ` COMMENT '${comment}'`;
+        alterQuery += modifyDef;
+        break;
+      }
+
+      case 'DROP_COLUMN':
+        if (!columnName) {
+          throw new Error('Nome da coluna é obrigatório para DROP_COLUMN');
+        }
+        alterQuery += `DROP COLUMN \`${columnName}\``;
+        break;
+
+      case 'ADD_CONSTRAINT': {
+        if (!constraintName || !constraintType) {
+          throw new Error('Nome e tipo da constraint são obrigatórios para ADD_CONSTRAINT');
+        }
+        let constraintDef = '';
+        switch (constraintType) {
+        case 'PRIMARY KEY':
+          constraintDef += `ADD PRIMARY KEY (${constraintColumns.map(col => `\`${col}\``).join(', ')})`;
+          break;
+        case 'UNIQUE':
+          constraintDef += `ADD UNIQUE KEY \`${constraintName}\` (${constraintColumns.map(col => `\`${col}\``).join(', ')})`;
+          break;
+        case 'FOREIGN KEY':
+          constraintDef += `ADD CONSTRAINT \`${constraintName}\` FOREIGN KEY (${constraintColumns.map(col => `\`${col}\``).join(', ')}) REFERENCES \`${referencedTable}\`(${referencedColumns.map(col => `\`${col}\``).join(', ')})`;
+          if (onDelete) constraintDef += ` ON DELETE ${onDelete}`;
+          if (onUpdate) constraintDef += ` ON UPDATE ${onUpdate}`;
+          break;
+        case 'INDEX':
+          constraintDef += `ADD INDEX \`${constraintName}\` (${constraintColumns.map(col => `\`${col}\``).join(', ')})`;
           break;
         }
+        alterQuery += constraintDef;
+        break;
+      }
 
-        case 'MODIFY_COLUMN': {
-          if (!columnName || !columnType) {
-            throw new Error('Nome e tipo da coluna são obrigatórios para MODIFY_COLUMN');
-          }
-          let modifyDef = `MODIFY COLUMN \`${columnName}\` ${columnType}`;
-          if (columnLength) modifyDef += `(${columnLength})`;
-          if (notNull !== undefined) modifyDef += notNull ? ' NOT NULL' : ' NULL';
-          if (autoIncrement) modifyDef += ' AUTO_INCREMENT';
-          if (defaultValue !== undefined) modifyDef += ` DEFAULT ${defaultValue}`;
-          if (comment) modifyDef += ` COMMENT '${comment}'`;
-          alterQuery += modifyDef;
-          break;
+      case 'DROP_CONSTRAINT':
+        if (!constraintName) {
+          throw new Error('Nome da constraint é obrigatório para DROP_CONSTRAINT');
         }
+        alterQuery += `DROP INDEX \`${constraintName}\``;
+        break;
 
-        case 'DROP_COLUMN':
-          if (!columnName) {
-            throw new Error('Nome da coluna é obrigatório para DROP_COLUMN');
-          }
-          alterQuery += `DROP COLUMN \`${columnName}\``;
-          break;
-
-        case 'ADD_CONSTRAINT': {
-          if (!constraintName || !constraintType) {
-            throw new Error('Nome e tipo da constraint são obrigatórios para ADD_CONSTRAINT');
-          }
-          let constraintDef = '';
-          switch (constraintType) {
-            case 'PRIMARY KEY':
-              constraintDef += `ADD PRIMARY KEY (${constraintColumns.map(col => `\`${col}\``).join(', ')})`;
-              break;
-            case 'UNIQUE':
-              constraintDef += `ADD UNIQUE KEY \`${constraintName}\` (${constraintColumns.map(col => `\`${col}\``).join(', ')})`;
-              break;
-            case 'FOREIGN KEY':
-              constraintDef += `ADD CONSTRAINT \`${constraintName}\` FOREIGN KEY (${constraintColumns.map(col => `\`${col}\``).join(', ')}) REFERENCES \`${referencedTable}\`(${referencedColumns.map(col => `\`${col}\``).join(', ')})`;
-              if (onDelete) constraintDef += ` ON DELETE ${onDelete}`;
-              if (onUpdate) constraintDef += ` ON UPDATE ${onUpdate}`;
-              break;
-            case 'INDEX':
-              constraintDef += `ADD INDEX \`${constraintName}\` (${constraintColumns.map(col => `\`${col}\``).join(', ')})`;
-              break;
-          }
-          alterQuery += constraintDef;
-          break;
+      case 'RENAME_COLUMN':
+        if (!columnName || !newColumnName) {
+          throw new Error('Nome atual e novo nome da coluna são obrigatórios para RENAME_COLUMN');
         }
+        alterQuery += `CHANGE COLUMN \`${columnName}\` \`${newColumnName}\` ${columnType}`;
+        break;
 
-        case 'DROP_CONSTRAINT':
-          if (!constraintName) {
-            throw new Error('Nome da constraint é obrigatório para DROP_CONSTRAINT');
-          }
-          alterQuery += `DROP INDEX \`${constraintName}\``;
-          break;
+      case 'RENAME_TABLE':
+        if (!newTableName) {
+          throw new Error('Novo nome da tabela é obrigatório para RENAME_TABLE');
+        }
+        alterQuery = `ALTER TABLE \`${database}\`.\`${tableName}\` RENAME TO \`${database}\`.\`${newTableName}\``;
+        break;
 
-        case 'RENAME_COLUMN':
-          if (!columnName || !newColumnName) {
-            throw new Error('Nome atual e novo nome da coluna são obrigatórios para RENAME_COLUMN');
-          }
-          alterQuery += `CHANGE COLUMN \`${columnName}\` \`${newColumnName}\` ${columnType}`;
-          break;
-
-        case 'RENAME_TABLE':
-          if (!newTableName) {
-            throw new Error('Novo nome da tabela é obrigatório para RENAME_TABLE');
-          }
-          alterQuery = `ALTER TABLE \`${database}\`.\`${tableName}\` RENAME TO \`${database}\`.\`${newTableName}\``;
-          break;
-
-        default:
-          throw new Error(`Operação não suportada: ${operation}`);
+      default:
+        throw new Error(`Operação não suportada: ${operation}`);
       }
 
       await connection.execute(alterQuery);

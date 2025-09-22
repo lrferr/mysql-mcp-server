@@ -1,7 +1,7 @@
 # 🚀 MySQL Node MCP Server
 
-[![npm version](https://badge.fury.io/js/mysql-mcp-server.svg)](https://badge.fury.io/js/mysql-mcp-server)
-[![Downloads](https://img.shields.io/npm/dm/mysql-mcp-server.svg)](https://www.npmjs.com/package/mysql-mcp-server)
+[![npm version](https://badge.fury.io/js/mysql-mcp-server-v1.svg)](https://badge.fury.io/js/mysql-mcp-server-v1)
+[![Downloads](https://img.shields.io/npm/dm/mysql-mcp-server-v1.svg)](https://www.npmjs.com/package/mysql-mcp-server-v1)
 [![GitHub stars](https://img.shields.io/github/stars/lrferr/mysql-mcp-server.svg)](https://github.com/lrferr/mysql-mcp-server/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -20,7 +20,7 @@ Um servidor MCP (Model Context Protocol) para monitoramento e interação com My
 
 ### 1. Instalação
 ```bash
-npm install -g mysql-mcp-server
+npm install -g mysql-mcp-server-v1
 ```
 
 ### 2. Configuração MCP (Cursor/Claude Desktop)
@@ -32,7 +32,7 @@ Adicione a seguinte configuração ao seu arquivo `mcp.json`:
   "mcpServers": {
     "mysql-monitor": {
       "command": "npx",
-      "args": ["mysql-mcp-server@latest"],
+      "args": ["mysql-mcp-server-v1@latest"],
       "env": {
         "MCP_SERVER_NAME": "mysql-monitor",
         "MCP_SERVER_VERSION": "1.0.0",
@@ -50,7 +50,7 @@ Adicione a seguinte configuração ao seu arquivo `mcp.json`:
   "mcpServers": {
     "mysql-monitor": {
       "command": "npx",
-      "args": ["mysql-mcp-server@latest"],
+      "args": ["mysql-mcp-server-v1@latest"],
       "env": {
         "MCP_SERVER_NAME": "mysql-monitor",
         "MCP_SERVER_VERSION": "1.0.0",
@@ -65,13 +65,13 @@ Adicione a seguinte configuração ao seu arquivo `mcp.json`:
 ### 3. Configuração Automática (Opcional)
 ```bash
 # Configurar Cursor IDE automaticamente
-npx mysql-mcp-server setup-cursor
+npx mysql-mcp-server-v1 setup-cursor
 
 # Diagnosticar problemas de conectividade
-npx mysql-mcp-server diagnose
+npx mysql-mcp-server-v1 diagnose
 
 # Testar conexão MySQL
-npx mysql-mcp-server test-connection
+npx mysql-mcp-server-v1 test-connection
 ```
 
 ## 🛠️ Ferramentas Disponíveis

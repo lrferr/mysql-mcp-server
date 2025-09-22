@@ -38,17 +38,17 @@ export class NotificationService {
 
       // Log no logger principal
       switch (severity) {
-        case 'error':
-          this.logger.error(`[${type}] ${message}`, metadata);
-          break;
-        case 'warning':
-          this.logger.warn(`[${type}] ${message}`, metadata);
-          break;
-        case 'success':
-          this.logger.info(`[${type}] ${message}`, metadata);
-          break;
-        default:
-          this.logger.info(`[${type}] ${message}`, metadata);
+      case 'error':
+        this.logger.error(`[${type}] ${message}`, metadata);
+        break;
+      case 'warning':
+        this.logger.warn(`[${type}] ${message}`, metadata);
+        break;
+      case 'success':
+        this.logger.info(`[${type}] ${message}`, metadata);
+        break;
+      default:
+        this.logger.info(`[${type}] ${message}`, metadata);
       }
 
       // Log específico de notificação

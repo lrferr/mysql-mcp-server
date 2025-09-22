@@ -118,19 +118,19 @@ export class MySQLMonitor {
     const queries = [
       {
         name: 'QPS (Queries per Second)',
-        query: `SHOW GLOBAL STATUS LIKE 'Queries'`
+        query: 'SHOW GLOBAL STATUS LIKE \'Queries\''
       },
       {
         name: 'Uptime',
-        query: `SHOW GLOBAL STATUS LIKE 'Uptime'`
+        query: 'SHOW GLOBAL STATUS LIKE \'Uptime\''
       },
       {
         name: 'Threads Connected',
-        query: `SHOW GLOBAL STATUS LIKE 'Threads_connected'`
+        query: 'SHOW GLOBAL STATUS LIKE \'Threads_connected\''
       },
       {
         name: 'Max Used Connections',
-        query: `SHOW GLOBAL STATUS LIKE 'Max_used_connections'`
+        query: 'SHOW GLOBAL STATUS LIKE \'Max_used_connections\''
       }
     ];
 

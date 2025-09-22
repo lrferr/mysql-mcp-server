@@ -165,7 +165,7 @@ export class DMLOperations {
 
       const [result] = await connection.execute(insertQuery, params);
 
-      let output = `✅ Dados inseridos com sucesso!`;
+      let output = '✅ Dados inseridos com sucesso!';
       output += `\n- **ID inserido:** ${result.insertId || 'N/A'}`;
       output += `\n- **Linhas afetadas:** ${result.affectedRows}`;
 
@@ -226,7 +226,7 @@ export class DMLOperations {
 
       const [result] = await connection.execute(insertQuery, params);
 
-      let output = `✅ Múltiplos dados inseridos com sucesso!`;
+      let output = '✅ Múltiplos dados inseridos com sucesso!';
       output += `\n- **Primeiro ID inserido:** ${result.insertId || 'N/A'}`;
       output += `\n- **Linhas afetadas:** ${result.affectedRows}`;
       output += `\n- **Registros processados:** ${dataArray.length}`;
@@ -289,7 +289,7 @@ export class DMLOperations {
 
       const [result] = await connection.execute(updateQuery, params);
 
-      let output = `✅ Dados atualizados com sucesso!`;
+      let output = '✅ Dados atualizados com sucesso!';
       output += `\n- **Linhas afetadas:** ${result.affectedRows}`;
       output += `\n- **Linhas encontradas:** ${result.affectedRows}`;
 
@@ -350,7 +350,7 @@ export class DMLOperations {
 
       const [result] = await connection.execute(deleteQuery);
 
-      let output = `✅ Dados removidos com sucesso!`;
+      let output = '✅ Dados removidos com sucesso!';
       output += `\n- **Linhas afetadas:** ${result.affectedRows}`;
 
       // Se foi especificado RETURNING e temos resultado
@@ -479,9 +479,9 @@ export class DMLOperations {
 
       await connection.commit();
 
-      let output = `✅ Transação executada com sucesso!\n`;
+      let output = '✅ Transação executada com sucesso!\n';
       output += `- **Operações executadas:** ${operations.length}\n`;
-      output += `- **Status:** Todas as operações foram commitadas\n`;
+      output += '- **Status:** Todas as operações foram commitadas\n';
 
       results.forEach((result, index) => {
         output += `\n**Operação ${index + 1} (${result.operation}):**\n`;
