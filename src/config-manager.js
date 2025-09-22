@@ -42,6 +42,9 @@ class ConfigManager {
     // 4. Usar configurações padrão seguras
     this.tryLoadDefaults();
 
+    // Selecionar a melhor configuração baseada na prioridade
+    this.selectBestConfiguration();
+
     this.displayConfigurationSummary();
     return this.finalConfig;
   }

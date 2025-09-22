@@ -192,14 +192,17 @@ export class ConnectionManager {
     
     for (const [connName, connection] of this.connections) {
       try {
-        const result = await connection.execute('SELECT DATABASE() as database, USER() as user, @@hostname as host');
+        const result = await connection.execute('SELECT DATABASE() as `current_database`, USER() as `current_user`, @@hostname as `server_host`');
         
         status[connName] = {
           active: true,
           info: {
-            database: result[0][0].database,
-            user: result[0][0].user,
-            host: result[0][0].host
+            current_database: result[0][0].current_database,
+            current_user: result[0][0].current_user,
+            server_host: result[0][0].server_host,
+            database: result[0][0].current_database,
+            user: result[0][0].current_user,
+            host: result[0][0].server_host
           }
         };
       } catch (error) {
