@@ -735,6 +735,370 @@ export class MySQLMonitor {
     
     return { default: { active: false, error: 'ConnectionManager não disponível' } };
   }
+
+  // Função para analisar uma tabela e gerar estatísticas
+  async analyzeTable(options = {}) {
+    const { connectionName, tableName, databaseName } = options;
+    let connection;
+
+    try {
+      connection = await this.getConnection(connectionName);
+      
+      if (tableName === '*') {
+        // Se for '*', analisar todas as tabelas do banco
+        return await this.analyzeAllTables(connection, databaseName);
+      } else {
+        // Analisar uma tabela específica
+        return await this.analyzeSingleTable(connection, tableName, databaseName);
+      }
+    } catch (error) {
+      this.logger.error('Erro ao analisar tabela:', error);
+      return `❌ Erro ao analisar tabela: ${error.message}`;
+    } finally {
+      if (connection) {
+        await connection.end();
+      }
+    }
+  }
+
+  async analyzeAllTables(connection, databaseName) {
+    const query = `
+      SELECT 
+        table_name,
+        table_rows,
+        ROUND((data_length + index_length) / 1024 / 1024, 2) AS size_mb,
+        ROUND(data_length / 1024 / 1024, 2) AS data_mb,
+        ROUND(index_length / 1024 / 1024, 2) AS index_mb,
+        create_time,
+        update_time
+      FROM information_schema.tables 
+      WHERE table_schema = ?
+        AND table_type = 'BASE TABLE'
+      ORDER BY (data_length + index_length) DESC
+    `;
+
+    const [rows] = await connection.execute(query, [databaseName]);
+    
+    let output = `## Análise de Todas as Tabelas do Banco: ${databaseName}\n\n`;
+    
+    if (rows.length === 0) {
+      output += 'Nenhuma tabela encontrada.\n';
+      return output;
+    }
+
+    for (const row of rows) {
+      const status = row.size_mb > 100 ? '⚠️' : row.size_mb > 10 ? '⚡' : '✅';
+      output += `### ${status} ${row.table_name}\n`;
+      output += `- **Linhas:** ${row.table_rows || 'N/A'}\n`;
+      output += `- **Tamanho Total:** ${row.size_mb}MB\n`;
+      output += `- **Dados:** ${row.data_mb}MB\n`;
+      output += `- **Índices:** ${row.index_mb}MB\n`;
+      output += `- **Última Atualização:** ${row.update_time || 'N/A'}\n\n`;
+    }
+
+    return output;
+  }
+
+  async analyzeSingleTable(connection, tableName, databaseName) {
+    const queries = [
+      {
+        name: 'Informações Básicas',
+        query: `
+          SELECT 
+            table_name,
+            table_rows,
+            ROUND((data_length + index_length) / 1024 / 1024, 2) AS size_mb,
+            ROUND(data_length / 1024 / 1024, 2) AS data_mb,
+            ROUND(index_length / 1024 / 1024, 2) AS index_mb,
+            create_time,
+            update_time,
+            table_comment
+          FROM information_schema.tables 
+          WHERE table_name = ? AND table_schema = ?
+        `,
+        params: [tableName, databaseName]
+      },
+      {
+        name: 'Estrutura das Colunas',
+        query: `
+          SELECT 
+            column_name,
+            data_type,
+            is_nullable,
+            column_default,
+            column_comment,
+            ordinal_position
+          FROM information_schema.columns 
+          WHERE table_name = ? AND table_schema = ?
+          ORDER BY ordinal_position
+        `,
+        params: [tableName, databaseName]
+      },
+      {
+        name: 'Índices',
+        query: `
+          SELECT 
+            index_name,
+            column_name,
+            seq_in_index,
+            non_unique,
+            index_type
+          FROM information_schema.statistics 
+          WHERE table_name = ? AND table_schema = ?
+          ORDER BY index_name, seq_in_index
+        `,
+        params: [tableName, databaseName]
+      }
+    ];
+
+    let output = `## Análise da Tabela: ${tableName}\n\n`;
+
+    for (const q of queries) {
+      try {
+        const [rows] = await connection.execute(q.query, q.params);
+        
+        output += `### ${q.name}\n`;
+        
+        if (q.name === 'Informações Básicas' && rows.length > 0) {
+          const row = rows[0];
+          output += `- **Linhas:** ${row.table_rows || 'N/A'}\n`;
+          output += `- **Tamanho Total:** ${row.size_mb}MB\n`;
+          output += `- **Dados:** ${row.data_mb}MB\n`;
+          output += `- **Índices:** ${row.index_mb}MB\n`;
+          output += `- **Criada em:** ${row.create_time}\n`;
+          output += `- **Última Atualização:** ${row.update_time || 'N/A'}\n`;
+          if (row.table_comment) {
+            output += `- **Comentário:** ${row.table_comment}\n`;
+          }
+        } else if (q.name === 'Estrutura das Colunas') {
+          if (rows.length === 0) {
+            output += 'Nenhuma coluna encontrada.\n';
+          } else {
+            for (const row of rows) {
+              const nullable = row.is_nullable === 'YES' ? 'NULL' : 'NOT NULL';
+              const defaultValue = row.column_default ? ` DEFAULT ${row.column_default}` : '';
+              const comment = row.column_comment ? ` -- ${row.column_comment}` : '';
+              output += `- **${row.column_name}** (${row.data_type}) ${nullable}${defaultValue}${comment}\n`;
+            }
+          }
+        } else if (q.name === 'Índices') {
+          if (rows.length === 0) {
+            output += 'Nenhum índice encontrado.\n';
+          } else {
+            const indexGroups = {};
+            for (const row of rows) {
+              if (!indexGroups[row.index_name]) {
+                indexGroups[row.index_name] = [];
+              }
+              indexGroups[row.index_name].push(row);
+            }
+            
+            for (const [indexName, columns] of Object.entries(indexGroups)) {
+              const unique = columns[0].non_unique === 0 ? 'UNIQUE' : 'INDEX';
+              const type = columns[0].index_type;
+              const columnList = columns.map(col => col.column_name).join(', ');
+              output += `- **${indexName}** (${unique}, ${type}): ${columnList}\n`;
+            }
+          }
+        }
+        
+        output += '\n';
+      } catch (error) {
+        output += `Erro ao obter ${q.name}: ${error.message}\n\n`;
+      }
+    }
+
+    return output;
+  }
+
+  // Função para obter constraints de uma tabela
+  async getConstraints(options = {}) {
+    const { connectionName, tableName, databaseName } = options;
+    let connection;
+
+    try {
+      connection = await this.getConnection(connectionName);
+      
+      const query = `
+        SELECT 
+          constraint_name,
+          constraint_type,
+          column_name,
+          referenced_table_name,
+          referenced_column_name
+        FROM information_schema.key_column_usage 
+        WHERE table_name = ? AND table_schema = ?
+        ORDER BY constraint_name, ordinal_position
+      `;
+
+      const [rows] = await connection.execute(query, [tableName, databaseName]);
+      
+      let output = `## Constraints da Tabela: ${tableName}\n\n`;
+      
+      if (rows.length === 0) {
+        output += 'Nenhuma constraint encontrada.\n';
+        return output;
+      }
+
+      const constraintGroups = {};
+      for (const row of rows) {
+        if (!constraintGroups[row.constraint_name]) {
+          constraintGroups[row.constraint_name] = row;
+          constraintGroups[row.constraint_name].columns = [];
+        }
+        constraintGroups[row.constraint_name].columns.push(row.column_name);
+      }
+
+      for (const [constraintName, constraint] of Object.entries(constraintGroups)) {
+        output += `### ${constraintName} (${constraint.constraint_type})\n`;
+        output += `- **Colunas:** ${constraint.columns.join(', ')}\n`;
+        
+        if (constraint.constraint_type === 'FOREIGN KEY') {
+          output += `- **Referencia:** ${constraint.referenced_table_name}.${constraint.referenced_column_name}\n`;
+        }
+        output += '\n';
+      }
+
+      return output;
+    } catch (error) {
+      this.logger.error('Erro ao obter constraints:', error);
+      return `❌ Erro ao obter constraints: ${error.message}`;
+    } finally {
+      if (connection) {
+        await connection.end();
+      }
+    }
+  }
+
+  // Função para obter foreign keys de uma tabela
+  async getForeignKeys(options = {}) {
+    const { connectionName, tableName, databaseName } = options;
+    let connection;
+
+    try {
+      connection = await this.getConnection(connectionName);
+      
+      const query = `
+        SELECT 
+          kcu.constraint_name,
+          kcu.column_name,
+          kcu.referenced_table_name,
+          kcu.referenced_column_name,
+          rc.update_rule,
+          rc.delete_rule
+        FROM information_schema.key_column_usage kcu
+        JOIN information_schema.referential_constraints rc 
+          ON kcu.constraint_name = rc.constraint_name 
+          AND kcu.table_schema = rc.constraint_schema
+        WHERE kcu.table_name = ? 
+          AND kcu.table_schema = ?
+          AND kcu.referenced_table_name IS NOT NULL
+        ORDER BY kcu.constraint_name, kcu.ordinal_position
+      `;
+
+      const [rows] = await connection.execute(query, [tableName, databaseName]);
+      
+      let output = `## Foreign Keys da Tabela: ${tableName}\n\n`;
+      
+      if (rows.length === 0) {
+        output += 'Nenhuma foreign key encontrada.\n';
+        return output;
+      }
+
+      const fkGroups = {};
+      for (const row of rows) {
+        if (!fkGroups[row.constraint_name]) {
+          fkGroups[row.constraint_name] = row;
+          fkGroups[row.constraint_name].columns = [];
+        }
+        fkGroups[row.constraint_name].columns.push(row.column_name);
+      }
+
+      for (const [fkName, fk] of Object.entries(fkGroups)) {
+        output += `### ${fkName}\n`;
+        output += `- **Colunas:** ${fk.columns.join(', ')}\n`;
+        output += `- **Referencia:** ${fk.referenced_table_name}.${fk.referenced_column_name}\n`;
+        output += `- **ON UPDATE:** ${fk.update_rule}\n`;
+        output += `- **ON DELETE:** ${fk.delete_rule}\n\n`;
+      }
+
+      return output;
+    } catch (error) {
+      this.logger.error('Erro ao obter foreign keys:', error);
+      return `❌ Erro ao obter foreign keys: ${error.message}`;
+    } finally {
+      if (connection) {
+        await connection.end();
+      }
+    }
+  }
+
+  // Função para obter índices de uma tabela
+  async getIndexes(options = {}) {
+    const { connectionName, tableName, databaseName } = options;
+    let connection;
+
+    try {
+      connection = await this.getConnection(connectionName);
+      
+      const query = `
+        SELECT 
+          index_name,
+          column_name,
+          seq_in_index,
+          non_unique,
+          index_type,
+          cardinality,
+          nullable
+        FROM information_schema.statistics 
+        WHERE table_name = ? AND table_schema = ?
+        ORDER BY index_name, seq_in_index
+      `;
+
+      const [rows] = await connection.execute(query, [tableName, databaseName]);
+      
+      let output = `## Índices da Tabela: ${tableName}\n\n`;
+      
+      if (rows.length === 0) {
+        output += 'Nenhum índice encontrado.\n';
+        return output;
+      }
+
+      const indexGroups = {};
+      for (const row of rows) {
+        if (!indexGroups[row.index_name]) {
+          indexGroups[row.index_name] = {
+            type: row.index_type,
+            unique: row.non_unique === 0,
+            cardinality: row.cardinality,
+            columns: []
+          };
+        }
+        indexGroups[row.index_name].columns.push({
+          name: row.column_name,
+          position: row.seq_in_index,
+          nullable: row.nullable
+        });
+      }
+
+      for (const [indexName, index] of Object.entries(indexGroups)) {
+        const unique = index.unique ? 'UNIQUE' : 'INDEX';
+        output += `### ${indexName} (${unique}, ${index.type})\n`;
+        output += `- **Colunas:** ${index.columns.map(col => col.name).join(', ')}\n`;
+        output += `- **Cardinalidade:** ${index.cardinality || 'N/A'}\n`;
+        output += `- **Permite NULL:** ${index.columns.some(col => col.nullable === 'YES') ? 'Sim' : 'Não'}\n\n`;
+      }
+
+      return output;
+    } catch (error) {
+      this.logger.error('Erro ao obter índices:', error);
+      return `❌ Erro ao obter índices: ${error.message}`;
+    } finally {
+      if (connection) {
+        await connection.end();
+      }
+    }
+  }
 }
 
 
