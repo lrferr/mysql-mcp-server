@@ -9,7 +9,9 @@ O erro de JSON parsing estava ocorrendo porque o comando `npx mysql-mcp-server-v
 - ✅ Adicionado binário `mysql-mcp-server-v1` que executa o servidor MCP diretamente
 - ✅ Modificado CLI para detectar quando está sendo executado como servidor MCP
 - ✅ Corrigido problema de saída formatada interferindo com protocolo JSON
-- ✅ Atualizado para versão 1.0.1
+- ✅ Adicionado wrapper script que verifica dependências antes de iniciar
+- ✅ Incluído denque como dependência explícita
+- ✅ Atualizado para versão 1.0.2
 
 ### 2. Configuração MCP Corrigida
 
@@ -23,7 +25,7 @@ Substitua a configuração `mysql-monitor-npm` no seu arquivo `~/.cursor/mcp.jso
       "args": ["mysql-mcp-server-v1@latest"],
       "env": {
         "MCP_SERVER_NAME": "mysql-monitor",
-        "MCP_SERVER_VERSION": "1.0.1",
+        "MCP_SERVER_VERSION": "1.0.2",
         "LOG_LEVEL": "info",
         "MYSQL_CONNECTIONS": "{\"connections\":{\"sigareplica\":{\"host\":\"10.200.110.10\",\"port\":3306,\"user\":\"sigareplica\",\"password\":\"SMJHmFhJgAf4q81EoDPb\",\"database\":\"mysql\"}},\"defaultConnection\":\"sigareplica\"}"
       }
@@ -44,7 +46,7 @@ Se ainda houver problemas, use esta configuração alternativa:
       "args": ["C:\\Users\\ufpr\\AppData\\Roaming\\npm\\node_modules\\mysql-mcp-server-v1\\src\\index.js"],
       "env": {
         "MCP_SERVER_NAME": "mysql-monitor",
-        "MCP_SERVER_VERSION": "1.0.1",
+        "MCP_SERVER_VERSION": "1.0.2",
         "LOG_LEVEL": "info",
         "MYSQL_CONNECTIONS": "{\"connections\":{\"sigareplica\":{\"host\":\"10.200.110.10\",\"port\":3306,\"user\":\"sigareplica\",\"password\":\"SMJHmFhJgAf4q81EoDPb\",\"database\":\"mysql\"}},\"defaultConnection\":\"sigareplica\"}"
       }
@@ -74,4 +76,4 @@ Sem os erros de JSON parsing que estavam ocorrendo antes.
 
 - **NPM Package**: https://www.npmjs.com/package/mysql-mcp-server-v1
 - **GitHub Repository**: https://github.com/lrferr/mysql-mcp-server
-- **Versão Corrigida**: 1.0.1
+- **Versão Corrigida**: 1.0.2

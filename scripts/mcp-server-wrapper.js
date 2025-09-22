@@ -17,7 +17,11 @@ async function checkDependencies() {
     } catch (error) {
       console.error(`Critical dependency '${dep}' is missing:`, error.message);
       console.error('This usually happens when using npx with cached packages.');
-      console.error('Please try: npm install -g mysql-mcp-server-v1');
+      console.error('');
+      console.error('Solutions:');
+      console.error('1. Install globally: npm install -g mysql-mcp-server-v1');
+      console.error('2. Clear npx cache: npm cache clean --force');
+      console.error('3. Use direct path configuration (see documentation)');
       process.exit(1);
     }
   }

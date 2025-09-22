@@ -1,11 +1,12 @@
 {
   "name": "mysql-mcp-server-v1",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Servidor MCP completo para MySQL Database com operações DDL, DML, DCL, monitoramento e auditoria",
   "main": "src/index.js",
   "bin": {
     "mysql-mcp": "bin/mysql-mcp-cli.js",
-    "mysql-mcp-server-v1": "scripts/mcp-server-wrapper.js"
+    "mysql-mcp-server-v1": "scripts/mcp-server-wrapper.js",
+    "mysql-mcp-server-direct": "scripts/run-mcp-server.js"
   },
   "type": "module",
   "scripts": {
