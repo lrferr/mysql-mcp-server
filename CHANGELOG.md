@@ -7,6 +7,55 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-01-22
+
+### Adicionado
+- 📋 **DDM (Data Definition Management)**: Gestão completa de schemas, tabelas, índices, views e rotinas
+  - `create_schema` - Cria novos schemas com charset e collation personalizados
+  - `drop_schema` - Remove schemas com opção de cascata
+  - `list_schemas` - Lista todos os schemas com filtros de sistema
+  - `list_tables` - Lista tabelas e views com informações detalhadas
+  - `get_table_structure` - Estrutura completa de tabelas com índices e constraints
+  - `analyze_indexes` - Análise detalhada de índices e performance
+  - `list_views` - Lista todas as views com metadados
+  - `list_routines` - Lista procedures e functions do banco
+
+- 👥 **DCM (Data Control Management)**: Gestão avançada de usuários, privilégios e segurança
+  - `create_user` - Cria usuários com validação de segurança
+  - `drop_user` - Remove usuários com verificação de existência
+  - `list_users` - Lista usuários com informações de segurança
+  - `change_password` - Altera senhas com validação de política
+  - `grant_privileges` - Concede privilégios granulares
+  - `revoke_privileges` - Revoga privilégios específicos
+  - `show_grants` - Mostra privilégios detalhados de usuários
+  - `list_privileges` - Lista todos os privilégios do sistema
+  - `audit_user_access` - Auditoria completa de acesso de usuários
+  - `check_password_policy` - Verifica políticas de senha e segurança
+
+- 🔄 **DLM (Data Lifecycle Management)**: Gestão de ciclo de vida e otimização de dados
+  - `create_backup` - Cria backups completos com compressão
+  - `restore_backup` - Restaura backups com validação
+  - `list_backups` - Lista backups com filtros de data e database
+  - `archive_old_data` - Arquivamento inteligente de dados antigos
+  - `apply_retention_policy` - Aplicação de políticas de retenção
+  - `compress_table` - Compressão de tabelas para economia de espaço
+  - `create_partition` - Criação de partições para performance
+  - `drop_partition` - Remoção de partições específicas
+
+### Melhorado
+- Sistema de validação de entrada mais robusto
+- Tratamento de erros aprimorado com mensagens mais claras
+- Logging detalhado para todas as operações de administração
+- Documentação de API atualizada com novas funcionalidades
+- Performance otimizada para operações em lote
+
+### Segurança
+- Validação rigorosa de nomes de usuários e senhas
+- Verificação de privilégios antes de operações sensíveis
+- Auditoria completa de todas as operações administrativas
+- Políticas de retenção de dados configuráveis
+- Backup seguro com verificação de integridade
+
 ## [1.1.2] - 2025-01-22
 
 ### Corrigido
