@@ -911,6 +911,141 @@ export class MySQLMonitor {
     return output;
   }
 
+  // Função para detectar atividades suspeitas
+  async detectSuspiciousActivity(options = {}) {
+    const { connectionName } = options;
+    let connection;
+
+    try {
+      connection = await this.getConnection(connectionName);
+      
+      const queries = [
+        {
+          name: 'Conexões Ativas Suspeitas',
+          query: `
+            SELECT 
+              ID,
+              USER,
+              HOST,
+              DB,
+              COMMAND,
+              TIME,
+              STATE,
+              INFO
+            FROM information_schema.PROCESSLIST 
+            WHERE USER NOT IN ('system user', 'event_scheduler')
+              AND COMMAND NOT IN ('Sleep', 'Connect')
+              AND TIME > 60
+            ORDER BY TIME DESC
+            LIMIT 10
+          `
+        },
+        {
+          name: 'Queries Longas em Execução',
+          query: `
+            SELECT 
+              ID,
+              USER,
+              HOST,
+              DB,
+              COMMAND,
+              TIME,
+              STATE,
+              LEFT(INFO, 100) as QUERY_PREVIEW
+            FROM information_schema.PROCESSLIST 
+            WHERE INFO IS NOT NULL 
+              AND COMMAND = 'Query'
+              AND TIME > 30
+            ORDER BY TIME DESC
+            LIMIT 10
+          `
+        },
+        {
+          name: 'Usuários com Múltiplas Conexões',
+          query: `
+            SELECT 
+              USER,
+              HOST,
+              COUNT(*) as connection_count,
+              GROUP_CONCAT(DISTINCT DB) as databases
+            FROM information_schema.PROCESSLIST 
+            WHERE USER NOT IN ('system user', 'event_scheduler')
+            GROUP BY USER, HOST
+            HAVING COUNT(*) > 5
+            ORDER BY connection_count DESC
+          `
+        },
+        {
+          name: 'Atividades Recentes de DDL',
+          query: `
+            SELECT 
+              EVENT_NAME,
+              EVENT_DEFINITION,
+              DEFINER,
+              LAST_EXECUTED,
+              STATUS
+            FROM information_schema.EVENTS 
+            WHERE STATUS = 'ENABLED'
+              AND LAST_EXECUTED > DATE_SUB(NOW(), INTERVAL 1 DAY)
+            ORDER BY LAST_EXECUTED DESC
+          `
+        }
+      ];
+
+      let output = `## 🔍 Detecção de Atividades Suspeitas\n\n`;
+
+      for (const q of queries) {
+        try {
+          const [rows] = await connection.execute(q.query);
+          
+          output += `### ${q.name}\n`;
+          
+          if (rows.length === 0) {
+            output += '✅ Nenhuma atividade suspeita detectada.\n\n';
+            continue;
+          }
+
+          // Marcar como suspeito se houver resultados
+          output += '⚠️ **Atividades suspeitas detectadas:**\n\n';
+
+          for (const row of rows) {
+            if (q.name === 'Conexões Ativas Suspeitas') {
+              output += `- **ID:** ${row.ID} | **User:** ${row.USER} | **Host:** ${row.HOST}\n`;
+              output += `  **Comando:** ${row.COMMAND} | **Tempo:** ${row.TIME}s | **Estado:** ${row.STATE || 'N/A'}\n`;
+              if (row.INFO) {
+                output += `  **Query:** ${row.INFO.substring(0, 100)}...\n`;
+              }
+              output += '\n';
+            } else if (q.name === 'Queries Longas em Execução') {
+              output += `- **ID:** ${row.ID} | **User:** ${row.USER} | **Tempo:** ${row.TIME}s\n`;
+              output += `  **Query:** ${row.QUERY_PREVIEW}...\n\n`;
+            } else if (q.name === 'Usuários com Múltiplas Conexões') {
+              output += `- **User:** ${row.USER} | **Host:** ${row.HOST}\n`;
+              output += `  **Conexões:** ${row.connection_count} | **Databases:** ${row.databases}\n\n`;
+            } else if (q.name === 'Atividades Recentes de DDL') {
+              output += `- **Event:** ${row.EVENT_NAME}\n`;
+              output += `  **Definido por:** ${row.DEFINER} | **Última execução:** ${row.LAST_EXECUTED}\n`;
+              output += `  **Status:** ${row.STATUS}\n\n`;
+            }
+          }
+          
+          output += '\n';
+        } catch (error) {
+          output += `❌ Erro ao verificar ${q.name}: ${error.message}\n\n`;
+        }
+      }
+
+      return output;
+    } catch (error) {
+      this.logger.error('Erro ao detectar atividades suspeitas:', error);
+      return `❌ Erro ao detectar atividades suspeitas: ${error.message}`;
+    } finally {
+      if (connection) {
+        await connection.end();
+      }
+    }
+  }
+
   // Função para obter constraints de uma tabela
   async getConstraints(options = {}) {
     const { connectionName, tableName, databaseName } = options;
@@ -919,16 +1054,21 @@ export class MySQLMonitor {
     try {
       connection = await this.getConnection(connectionName);
       
+      // Query corrigida para evitar ambiguidade
       const query = `
         SELECT 
-          constraint_name,
-          constraint_type,
-          column_name,
-          referenced_table_name,
-          referenced_column_name
-        FROM information_schema.key_column_usage 
-        WHERE table_name = ? AND table_schema = ?
-        ORDER BY constraint_name, ordinal_position
+          tc.constraint_name,
+          tc.constraint_type,
+          kcu.column_name,
+          kcu.referenced_table_name,
+          kcu.referenced_column_name
+        FROM information_schema.table_constraints tc
+        LEFT JOIN information_schema.key_column_usage kcu 
+          ON tc.constraint_name = kcu.constraint_name 
+          AND tc.table_schema = kcu.table_schema
+        WHERE tc.table_name = ? 
+          AND tc.table_schema = ?
+        ORDER BY tc.constraint_name, kcu.ordinal_position
       `;
 
       const [rows] = await connection.execute(query, [tableName, databaseName]);

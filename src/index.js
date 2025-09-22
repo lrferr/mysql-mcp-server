@@ -33,7 +33,7 @@ class MySQLMCPServer {
     this.server = new Server(
       {
         name: getEnvVar('MCP_SERVER_NAME', 'mysql-mcp-server-v1'),
-        version: getEnvVar('MCP_SERVER_VERSION', '1.1.6')
+        version: getEnvVar('MCP_SERVER_VERSION', '1.1.7')
       },
       {
         capabilities: {
