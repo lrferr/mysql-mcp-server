@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "mysql-monitor-npm": {
+      "command": "node",
+      "args": ["C:\\Users\\ufpr\\AppData\\Roaming\\npm\\node_modules\\mysql-mcp-server-v1\\src\\index.js"],
+      "env": {
+        "MCP_SERVER_NAME": "mysql-monitor",
+        "MCP_SERVER_VERSION": "1.0.0",
+        "LOG_LEVEL": "info",
+        "MYSQL_CONNECTIONS": "{\"connections\":{\"sigareplica\":{\"host\":\"10.200.110.10\",\"port\":3306,\"user\":\"sigareplica\",\"password\":\"SMJHmFhJgAf4q81EoDPb\",\"database\":\"mysql\"}},\"defaultConnection\":\"sigareplica\"}"
+      }
+    }
+  }
+}

@@ -23,7 +23,17 @@ class MySQLMCPCLI {
     const args = process.argv.slice(2);
     const command = args[0];
 
-    console.log(chalk.blue.bold('🔧 MySQL MCP CLI\n'));
+    // Verificar se está sendo executado como servidor MCP
+    const isMCPServer = process.env.MCP_SERVER_NAME || process.env.NODE_ENV === 'mcp';
+    
+    if (!isMCPServer) {
+      console.log(chalk.blue.bold('🔧 MySQL MCP CLI\n'));
+    }
+
+    // Se está sendo executado como servidor MCP, não executar comandos CLI
+    if (isMCPServer) {
+      return;
+    }
 
     try {
       switch (command) {
