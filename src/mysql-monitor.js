@@ -992,7 +992,7 @@ export class MySQLMonitor {
         }
       ];
 
-      let output = `## 🔍 Detecção de Atividades Suspeitas\n\n`;
+      let output = '## 🔍 Detecção de Atividades Suspeitas\n\n';
 
       for (const q of queries) {
         try {
