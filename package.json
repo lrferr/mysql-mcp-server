@@ -1,6 +1,6 @@
 {
   "name": "mysql-mcp-server-v1",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Servidor MCP completo para MySQL Database com operações DDL, DML, DCL, monitoramento e auditoria",
   "main": "src/index.js",
   "bin": {

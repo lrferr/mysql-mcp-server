@@ -31,8 +31,8 @@ async function startServer() {
   await checkDependencies();
   
   // Importar e executar o servidor principal
-  const { default: server } = await import('../src/index.js');
-  return server;
+  // O index.js agora executa diretamente, então apenas importamos
+  await import('../src/index.js');
 }
 
 // Executar o servidor
