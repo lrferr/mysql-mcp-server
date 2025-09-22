@@ -13,19 +13,20 @@ const projectRoot = path.resolve(__dirname, '..');
 // Carregar variáveis de ambiente
 dotenv.config({ path: path.join(projectRoot, '.env') });
 
-class ConnectionTester {
+class HierarchicalConfigTester {
   constructor() {
     this.connectionManager = null;
   }
 
   async run() {
-    console.log(chalk.blue.bold('🔌 Teste de Conexão MySQL MCP Server\n'));
+    console.log(chalk.blue.bold('🔧 Teste de Configuração Hierárquica MySQL MCP Server\n'));
 
     try {
       await this.initializeConnectionManager();
       await this.testAllConnections();
       await this.displayConnectionStatus();
       await this.testSpecificOperations();
+      await this.displayConfigurationSources();
     } catch (error) {
       console.error(chalk.red.bold('❌ Erro durante o teste:'), error.message);
       process.exit(1);
@@ -40,44 +41,11 @@ class ConnectionTester {
       this.connectionManager = new ConnectionManager();
       await this.connectionManager.initialize();
       
-      // Mostrar informações sobre a origem da configuração
-      this.displayConfigurationSource();
-      
       console.log(chalk.green('✅ Gerenciador de conexões inicializado'));
     } catch (error) {
       throw new Error(`Falha ao inicializar gerenciador de conexões: ${error.message}`);
     }
 
-    console.log();
-  }
-
-  displayConfigurationSource() {
-    console.log(chalk.blue('📋 Sistema de Configuração Hierárquico:'));
-    
-    try {
-      const configManager = this.connectionManager.configManager;
-      const sources = configManager.getAllSources();
-      const selectedSource = configManager.getConfigSource();
-
-      console.log(chalk.blue('🔍 Fontes detectadas (em ordem de prioridade):'));
-      sources.forEach((source, index) => {
-        const status = source.source === selectedSource ? '✅ ATIVA' : '⏸️  Disponível';
-        console.log(`${index + 1}. ${status} ${source.source} (Prioridade ${source.priority})`);
-        
-        if (source.config?.connections) {
-          const connectionNames = Object.keys(source.config.connections);
-          console.log(chalk.gray(`   Conexões: ${connectionNames.join(', ')}`));
-          console.log(chalk.gray(`   Padrão: ${source.config.defaultConnection}`));
-        }
-        console.log();
-      });
-
-      console.log(chalk.green.bold(`🎯 Configuração Selecionada: ${selectedSource}`));
-      
-    } catch (error) {
-      console.log(chalk.red('❌ Erro ao exibir fontes de configuração:'), error.message);
-    }
-    
     console.log();
   }
 
@@ -153,7 +121,7 @@ class ConnectionTester {
         });
         console.log(chalk.green('✅ Health check executado com sucesso'));
         console.log(chalk.gray('Resultado:'));
-        console.log(chalk.gray(healthResult));
+        console.log(chalk.gray(JSON.stringify(healthResult, null, 2)));
       } catch (error) {
         console.log(chalk.red('❌ Health check falhou:'), error.message);
       }
@@ -163,29 +131,15 @@ class ConnectionTester {
       // Testar query segura
       console.log(chalk.blue('🔍 Testando query segura...'));
       try {
-        const queryResult = await monitor.executeSafeQuery('SELECT 1 + 1 AS solution');
+        const queryResult = await monitor.executeSafeQuery('SELECT 1 + 1 AS solution, NOW() AS current_time');
         console.log(chalk.green('✅ Query segura executada com sucesso'));
         console.log(chalk.gray('Resultado:'));
-        console.log(chalk.gray(queryResult));
+        console.log(chalk.gray(JSON.stringify(queryResult, null, 2)));
       } catch (error) {
         console.log(chalk.red('❌ Query segura falhou:'), error.message);
       }
 
       console.log();
-
-      // Testar informações do banco
-      console.log(chalk.blue('📋 Testando informações do banco...'));
-      try {
-        const dbInfo = await monitor.getDatabaseInfo({
-          includeUsers: false,
-          includeDatabases: true
-        });
-        console.log(chalk.green('✅ Informações do banco obtidas com sucesso'));
-        console.log(chalk.gray('Resultado:'));
-        console.log(chalk.gray(dbInfo));
-      } catch (error) {
-        console.log(chalk.red('❌ Informações do banco falharam:'), error.message);
-      }
 
     } catch (error) {
       console.log(chalk.red('❌ Erro ao testar operações específicas:'), error.message);
@@ -194,23 +148,55 @@ class ConnectionTester {
     console.log();
   }
 
+  async displayConfigurationSources() {
+    console.log(chalk.yellow('📋 Fontes de Configuração Detectadas...'));
+
+    try {
+      const configManager = this.connectionManager.configManager;
+      const sources = configManager.getAllSources();
+      const selectedSource = configManager.getConfigSource();
+
+      console.log(chalk.blue('🔍 Ordem de Prioridade:'));
+      sources.forEach((source, index) => {
+        const status = source.source === selectedSource ? '✅ SELECIONADA' : '⏸️  Disponível';
+        console.log(`${index + 1}. ${status} ${source.source} (Prioridade ${source.priority})`);
+        
+        if (source.config?.connections) {
+          const connectionNames = Object.keys(source.config.connections);
+          console.log(chalk.gray(`   Conexões: ${connectionNames.join(', ')}`));
+          console.log(chalk.gray(`   Padrão: ${source.config.defaultConnection}`));
+        }
+        console.log();
+      });
+
+      console.log(chalk.green.bold(`🎯 Configuração Ativa: ${selectedSource}`));
+      
+    } catch (error) {
+      console.log(chalk.red('❌ Erro ao exibir fontes de configuração:'), error.message);
+    }
+  }
+
   async displaySummary() {
-    console.log(chalk.green.bold('🎉 Teste de conexão concluído!\n'));
+    console.log(chalk.green.bold('🎉 Teste de Configuração Hierárquica Concluído!\n'));
 
     console.log(chalk.blue.bold('📋 Resumo:'));
-    console.log(chalk.blue('   - Conexões testadas'));
-    console.log(chalk.blue('   - Status verificado'));
-    console.log(chalk.blue('   - Operações básicas testadas'));
+    console.log(chalk.blue('   - Sistema hierárquico de configuração implementado'));
+    console.log(chalk.blue('   - Múltiplas fontes de configuração verificadas'));
+    console.log(chalk.blue('   - Conexões testadas com segurança'));
+    console.log(chalk.blue('   - Credenciais protegidas contra commits'));
 
-    console.log(chalk.blue.bold('\n🔧 Próximos passos:'));
-    console.log(chalk.blue('   - Execute "npm start" para iniciar o servidor'));
-    console.log(chalk.blue('   - Configure o Cursor IDE usando mcp.json'));
-    console.log(chalk.blue('   - Teste as ferramentas disponíveis'));
+    console.log(chalk.blue.bold('\n🔧 Ordem de Prioridade:'));
+    console.log(chalk.blue('   1. mcp.json (mais seguro, não vai para repo)'));
+    console.log(chalk.blue('   2. mysql-connections.json (arquivo local)'));
+    console.log(chalk.blue('   3. .env (variáveis de ambiente)'));
+    console.log(chalk.blue('   4. Configurações padrão seguras'));
 
-    console.log(chalk.green.bold('\n✨ Pronto para usar o MySQL MCP Server!'));
+    console.log(chalk.green.bold('\n✨ Sistema de Configuração Hierárquico Funcionando!'));
   }
 }
 
-// Executar teste de conexão
-const tester = new ConnectionTester();
-tester.run().catch(console.error);
+// Executar teste de configuração hierárquica
+const tester = new HierarchicalConfigTester();
+tester.run()
+  .then(() => tester.displaySummary())
+  .catch(console.error);

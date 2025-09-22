@@ -1,59 +1,42 @@
 import mysql from 'mysql2/promise';
 import { Logger } from './logger.js';
-import fs from 'fs';
+import ConfigManager from './config-manager.js';
 
 export class ConnectionManager {
-  constructor(configPath = './config/mysql-connections.json') {
+  constructor() {
     this.logger = new Logger();
     this.connections = new Map();
-    this.configPath = configPath;
     this.config = null;
-    this.loadConfig();
+    this.configManager = new ConfigManager();
+    this.initialized = false;
   }
 
-  loadConfig() {
+  async initialize() {
+    if (!this.initialized) {
+      await this.loadConfig();
+      this.initialized = true;
+    }
+    return this;
+  }
+
+  async loadConfig() {
     try {
-      // Primeiro, tenta carregar do arquivo JSON
-      const configFile = fs.readFileSync(this.configPath, 'utf8');
-      this.config = JSON.parse(configFile);
-      this.logger.info(`Configuração carregada do arquivo: ${this.configPath}`);
+      // Usar o novo sistema hierárquico de configuração
+      this.config = await this.configManager.loadConfigurations();
+      this.config = this.configManager.getFinalConfig();
+      const source = this.configManager.getConfigSource();
+      
+      this.logger.info(`Configuração carregada de: ${source}`);
       this.logger.info(`Conexões disponíveis: ${Object.keys(this.config.connections).join(', ')}`);
       this.logger.info(`Conexão padrão: ${this.config.defaultConnection}`);
-    } catch (fileError) {
-      // Se falhar, tenta carregar das variáveis de ambiente
-      try {
-        const envConfig = process.env.MYSQL_CONNECTIONS;
-        if (envConfig) {
-          this.config = JSON.parse(envConfig);
-          this.logger.info('Configuração carregada da variável de ambiente MYSQL_CONNECTIONS');
-          this.logger.info(`Conexões disponíveis: ${Object.keys(this.config.connections).join(', ')}`);
-          this.logger.info(`Conexão padrão: ${this.config.defaultConnection}`);
-        } else {
-          // Configuração padrão usando variáveis de ambiente individuais
-          this.config = {
-            connections: {
-              default: {
-                host: process.env.MYSQL_HOST || 'localhost',
-                port: parseInt(process.env.MYSQL_PORT || '3306'),
-                user: process.env.MYSQL_USER || 'root',
-                password: process.env.MYSQL_PASSWORD || '',
-                database: process.env.MYSQL_DATABASE || 'mysql'
-              }
-            },
-            defaultConnection: 'default'
-          };
-          this.logger.info('Configuração padrão carregada das variáveis de ambiente individuais');
-          this.logger.info(`Host: ${process.env.MYSQL_HOST || 'localhost'}:${process.env.MYSQL_PORT || '3306'}`);
-          this.logger.info(`Database: ${process.env.MYSQL_DATABASE || 'mysql'}`);
-        }
-      } catch (envError) {
-        this.logger.error('Erro ao carregar configuração de conexões:', envError);
-        throw new Error(`Falha ao carregar configuração: ${envError.message}`);
-      }
+    } catch (error) {
+      this.logger.error('Erro ao carregar configuração de conexões:', error);
+      throw new Error(`Falha ao carregar configuração: ${error.message}`);
     }
   }
 
   async getConnection(connectionName = null) {
+    await this.initialize();
     const connName = connectionName || this.config.defaultConnection;
     
     if (!this.config.connections[connName]) {
