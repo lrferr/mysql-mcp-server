@@ -1536,8 +1536,24 @@ class MySQLMCPServer {
   async start() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    // Não logar para stdout quando usando stdio transport
-    // this.logger.info('Servidor MCP MySQL iniciado com sucesso!');
+    
+    // Mostrar informações quando executado diretamente (não via MCP client)
+    if (process.stdin.isTTY) {
+      console.log('🚀 MySQL MCP Server iniciado!');
+      console.log('📡 Aguardando conexões MCP...');
+      console.log('');
+      console.log('💡 Para usar este servidor:');
+      console.log('   1. Configure no Cursor/Claude usando mcp.json');
+      console.log('   2. Ou use como servidor MCP via stdio');
+      console.log('');
+      console.log('⚙️  Configuração necessária:');
+      console.log('   - Variáveis de ambiente MySQL');
+      console.log('   - Arquivo de configuração mysql.json');
+      console.log('');
+      console.log('📚 Documentação: https://github.com/lrferr/mysql-mcp-server');
+      console.log('');
+      console.log('🔄 Servidor rodando... (Ctrl+C para parar)');
+    }
   }
 }
 
@@ -1548,7 +1564,14 @@ async function startServer() {
     await server.start();
     return server;
   } catch (error) {
-    // console.error('Erro ao iniciar servidor MCP:', error);
+    console.error('❌ Erro ao iniciar servidor MCP:', error.message);
+    console.error('');
+    console.error('🔧 Possíveis soluções:');
+    console.error('   1. Verifique as configurações MySQL');
+    console.error('   2. Confirme que as dependências estão instaladas');
+    console.error('   3. Verifique as variáveis de ambiente');
+    console.error('');
+    console.error('📋 Detalhes do erro:', error);
     process.exit(1);
   }
 }
